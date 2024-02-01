@@ -1,0 +1,17 @@
+{
+  "name": "tal-server",
+  "version": "1.0.0",
+  "description": "contains and handle https request for type and learn app",
+  "main": "server.js",
+  "scripts": {
+    "dev":"nodemon server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Raul Ramirez",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^16.4.1",
+    "express": "^4.18.2",
+    "nodemon": "^3.0.3"
+  }
+}
