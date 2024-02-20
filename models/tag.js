@@ -3,7 +3,7 @@ const { DataTypes } = require("sequelize");
 const sequelize = require("../util/database");
 
 const Tag = sequelize.define("tags", {
-  tag_id: {
+  tagId: {
     type: DataTypes.INTEGER,
     primaryKey: true,
     autoIncrement: true,

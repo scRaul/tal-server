@@ -1,29 +1,20 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../util/database");
-const Course = require("./course");
 const Module = require("./module");
 
 const Lesson = sequelize.define("lessons", {
-  lesson_id: {
+  lessonId: {
     type: DataTypes.INTEGER,
     primaryKey: true,
     autoIncrement: true,
     allowNull: false,
   },
-  course_id: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    references: {
-      model: Course,
-      key: "course_id",
-    },
-  },
-  module_id: {
+  moduleId: {
     type: DataTypes.INTEGER,
     allowNull: false,
     references: {
       model: Module,
-      key: "module_id",
+      key: "moduleId",
     },
   },
   title: {
@@ -37,7 +28,7 @@ const Lesson = sequelize.define("lessons", {
     type: DataTypes.INTEGER,
     allowNull: false,
   },
-  published: {
+  isPublic: {
     type: DataTypes.BOOLEAN,
     defaultValue: false,
   },

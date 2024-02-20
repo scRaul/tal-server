@@ -1,10 +1,9 @@
 const express = require("express");
 const router = express.Router();
-const controller = require("../controllers/userController");
+const controller = require("../controllers/authController");
 const multer = require("multer"); //parse formData
-const isAuth = require("../middleware/isAuth");
 
 router.use(multer().none());
-router.get("/verify", isAuth, controller.verified);
-
+router.post("/signup", controller.signup);
+router.post("/login", controller.login);
 module.exports = router;

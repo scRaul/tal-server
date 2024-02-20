@@ -3,17 +3,17 @@ const sequelize = require("../util/database");
 const User = require("./user");
 
 const Course = sequelize.define("courses", {
-  course_id: {
+  courseId: {
     type: DataTypes.INTEGER,
     primaryKey: true,
     autoIncrement: true,
     allowNull: false,
   },
-  creator_id: {
+  userId: {
     type: DataTypes.INTEGER,
     references: {
       model: User,
-      key: "user_id",
+      key: "userId",
     },
     allowNull: false,
   },
@@ -28,13 +28,9 @@ const Course = sequelize.define("courses", {
   thumbnail: {
     type: DataTypes.STRING(200),
   },
-  published: {
+  isPublic: {
     type: DataTypes.BOOLEAN,
     defaultValue: false,
-  },
-  date_created: {
-    type: DataTypes.DATE,
-    defaultValue: DataTypes.NOW,
   },
 });
 

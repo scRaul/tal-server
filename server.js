@@ -1,78 +1,60 @@
 require("dotenv").config();
 const express = require("express");
-const server = express();
-
-const userRoute = require("./routes/userRoute");
-const studioRoute = require("./routes/studioRoute");
+const sequelize = require("./util/database");
 
 //DATA BASE ----
-const sequelize = require("./util/database");
 const User = require("./models/user");
 const Course = require("./models/course");
 const Module = require("./models/module");
 const Lesson = require("./models/lesson");
 const Tag = require("./models/tag");
 // Define Relationships
-User.hasMany(Course, { foreignKey: "user_id" });
-Course.belongsTo(User, { foreignKey: "creator_id" });
+User.hasMany(Course, { foreignKey: "userId", onDelete: "CASCADE" });
+Course.belongsTo(User, { foreignKey: "userId" });
 
-Course.hasMany(Module, { foreignKey: "course_id" });
-Module.belongsTo(Course, { foreignKey: "course_id" });
+Course.hasMany(Module, { foreignKey: "courseId", onDelete: "CASCADE" });
+Module.belongsTo(Course, { foreignKey: "courseId" });
 
-Module.hasMany(Lesson, { foreignKey: "module_id" });
-Lesson.belongsTo(Module, { foreignKey: "module_id" });
+Module.hasMany(Lesson, { foreignKey: "moduleId", onDelete: "CASCADE" });
+Lesson.belongsTo(Module, { foreignKey: "moduleId" });
 
 Course.belongsToMany(Tag, { through: "CourseTags" });
 Tag.belongsToMany(Course, { through: "CourseTags" });
 
-//CORS ---
-server.use((req, res, next) => {
-  // Set CORS headers
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader(
-    "Access-Control-Allow-Methods",
-    "GET, POST, PUT, PATCH, DELETE, OPTIONS"
-  );
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
-  // Handle preflight requests (OPTIONS)
-  if (req.method === "OPTIONS") {
-    return res.sendStatus(200); // Respond with a 200 status for preflight requests
-  }
-  // Continue processing for non-preflight requests
-  next();
-});
+const app = express();
 
-server.use("/users", userRoute);
-server.use("/studio", studioRoute);
+// Middleware
+app.use(express.json());
+// Use logger middleware only if not in production
 
-// catch and handle all errors
-server.use((error, req, res, next) => {
-  var message = error.message;
-  if (error.name === "SequelizeValidationError") {
-    message = "Fix the following fields: ";
-    error.errors.forEach((element) => {
-      message += element.path;
-    });
+const logger = require("./middleware/logger");
+app.use(logger);
 
-    error.statusCode = 422;
-  }
-  const status = error.statusCode || 500;
-  res.status(status).json({
-    message: message,
-  });
-});
+//CORS handling
+const cors = require("./middleware/cors");
+app.use(cors);
+//ROUTES
+const authRoute = require("./routes/authRoute");
+app.use("/authenticate", authRoute);
+const courseRoute = require("./routes/courseRoute");
+app.use("/course", courseRoute);
+const moduleRoute = require("./routes/moduleRoute");
+app.use("/module", moduleRoute);
 
+//CATCH ALL ERRORS THROWN
+const errorHandler = require("./middleware/errorHandler");
+app.use(errorHandler);
+
+//START SEVER
 const port = process.env.PORT || 8080;
-
-sequelize
-  .sync()
-  .then((result) => {
-    console.log(result);
-
-    server.listen(port, () => {
-      console.log("listening on port ", port);
+async function startServer() {
+  try {
+    await sequelize.sync();
+    app.listen(port, () => {
+      console.log("app started on port", port);
     });
-  })
-  .catch((err) => {
-    console.log(err);
-  });
+  } catch (error) {
+    console.error("Error syncing sequelize:", error);
+  }
+}
+startServer();
