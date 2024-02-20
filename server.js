@@ -33,6 +33,7 @@ app.use(logger);
 //CORS handling
 const cors = require("./middleware/cors");
 app.use(cors);
+
 //ROUTES
 const authRoute = require("./routes/authRoute");
 app.use("/authenticate", authRoute);

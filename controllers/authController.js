@@ -5,7 +5,9 @@ exports.signup = async (req, res, next) => {
   try {
     const { email, password, name } = req.body;
     if (!email || !password || !name) {
-      return res.status(400).json({ message: "One or more fields is missing" });
+      const error = new Error("missing required fields");
+      error.statusCode = 400;
+      throw error;
     }
     if (password.length < 6) {
       return res
@@ -16,7 +18,9 @@ exports.signup = async (req, res, next) => {
     res
       .status(201)
       .json({ message: "User created successfully", user: userResponse });
-  } catch (error) {
+  } catch (err) {
+    const error = new Error("@Controller.signup" + err.message);
+    error.statusCode = err.statusCode || 500;
     next(error);
   }
 };
@@ -25,9 +29,9 @@ exports.login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
     if (!email || !password) {
-      return res
-        .status(400)
-        .json({ message: "One or more required fields are missig" });
+      const error = new Error("missing required fields");
+      error.statusCode = 400;
+      throw error;
     }
     const userResponse = await userService.login(email, password);
 
@@ -36,7 +40,9 @@ exports.login = async (req, res, next) => {
       token: userResponse.token,
       user: userResponse.user,
     });
-  } catch (error) {
+  } catch (err) {
+    const error = new Error("@Controller.login" + err.message);
+    error.statusCode = err.statusCode || 500;
     next(error);
   }
 };

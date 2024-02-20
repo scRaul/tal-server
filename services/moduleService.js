@@ -18,19 +18,20 @@ async function create(courseId, title) {
     });
     return newModule;
   } catch (error) {
-    throw new Error("Error creating mod: " + error.message);
+    throw new Error("@Service.create: " + error.message);
   }
 }
-async function update(moduleId, newData) {
+async function update(userId, newData) {
   try {
-    const mod = await Module.findByPk(moduleId);
+    const mod = await Module.findByPk(newData.moduleId);
     if (!mod) {
       throw new Error("Mod not found");
     }
+
     await mod.update(newData);
     return mod;
   } catch (error) {
-    throw new Error("Error updating mod: " + error.message);
+    throw new Error("@Service.update: " + error.message);
   }
 }
 async function remove(moduleId, userId) {
@@ -52,7 +53,7 @@ async function remove(moduleId, userId) {
     await mod.destroy();
     return "mod deleted successfully";
   } catch (error) {
-    throw new Error("Error deleting mod: " + error.message);
+    throw new Error("@Service.remove: " + error.message);
   }
 }
 
@@ -64,7 +65,7 @@ async function getByCourse(courseId) {
     }
     return module;
   } catch (error) {
-    throw new Error("Error obtiaining modules");
+    throw new Error("@Service.getByCourse: " + error.message);
   }
 }
 
@@ -76,29 +77,19 @@ async function getById(id) {
     }
     return mod;
   } catch (error) {
-    throw new Error("Error getting courses" + error.message);
+    throw new Error("@Service.getById: " + error.message);
   }
 }
 
 async function countModulesInCourse(courseId) {
   try {
     // Find the course by ID and include its modules
-    const course = await Course.findByPk(courseId, {
-      include: [
-        {
-          model: Module,
-          attributes: [], // Exclude module attributes from the result
-        },
-      ],
+    const count = await Module.count({
+      where: { courseId },
     });
-
-    // Access the modules array from the course object and get its length
-    const moduleCount = course && course.Modules ? course.Modules.length : 0;
-
-    return moduleCount;
+    return count;
   } catch (error) {
-    console.error("Error counting modules:", error);
-    throw error; // Forward the error to the caller
+    throw new Error("@Service.countModulesInCourse:" + error.message);
   }
 }
 

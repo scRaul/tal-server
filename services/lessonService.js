@@ -1,5 +1,4 @@
 const Lesson = require("../models/lesson");
-const crudService = require("../util/crudService");
 
 async function create(moduleId, title, index) {
   try {
@@ -18,7 +17,7 @@ async function create(moduleId, title, index) {
     });
     return newLesson;
   } catch (error) {
-    throw new Error("Error creating lesson: " + error.message);
+    throw new Error("@Service.create:" + error.message);
   }
 }
 async function update(lessonId, newData) {
@@ -30,7 +29,7 @@ async function update(lessonId, newData) {
     await lesson.update(newData);
     return lesson;
   } catch (error) {
-    throw new Error("Error updating lesson: " + error.message);
+    throw new Error("@Service.update:" + error.message);
   }
 }
 async function remove(lessonId) {
@@ -42,7 +41,7 @@ async function remove(lessonId) {
     await lesson.destroy();
     return "lesson deleted successfully";
   } catch (error) {
-    throw new Error("Error deleting lesson: " + error.message);
+    throw new Error("@Service.remove:" + error.message);
   }
 }
 
@@ -54,7 +53,7 @@ async function getByModule(moduleId) {
     }
     return lessons;
   } catch (error) {
-    throw new Error("Error obtiaining modules");
+    throw new Error("@Service.getByModule:" + error.message);
   }
 }
 
@@ -66,7 +65,7 @@ async function getById(id) {
     }
     return lesson;
   } catch (error) {
-    throw new Error("Error getting courses" + error.message);
+    throw new Error("@Service.getById:" + error.message);
   }
 }
 module.exports = {

@@ -20,19 +20,22 @@ async function create(userId, title, description, thumbnail) {
 
     return newCourse;
   } catch (error) {
-    throw new Error("Error creating course: " + error.message);
+    throw new Error("@Service.create: " + error.message);
   }
 }
-async function update(courseId, newData) {
+async function update(userId, newData) {
   try {
-    const course = await Course.findByPk(courseId);
+    const course = await Course.findByPk(newData.courseId);
     if (!course) {
       throw new Error("Course not found");
+    }
+    if (course.userId != userId) {
+      throw new Error("Unathourized request");
     }
     await course.update(newData);
     return course;
   } catch (error) {
-    throw new Error("Error updating course: " + error.message);
+    throw new Error("@Serive.update: " + error.message);
   }
 }
 
@@ -45,12 +48,12 @@ async function remove(courseId, userId) {
     }
 
     if (course.userId != userId) {
-      throw new Error("User doesnt have permission to delete this course");
+      throw new Error("Unathourized request");
     }
     await course.destroy();
     return "Course deleted successfully";
   } catch (error) {
-    throw new Error("Error deleting course: " + error.message);
+    throw new Error("@Service.remove: " + error.message);
   }
 }
 async function getPage(page) {
@@ -65,7 +68,7 @@ async function getPage(page) {
 
     return courses;
   } catch (error) {
-    throw new Error("Error getting courses: " + error.message);
+    throw new Error("@Service.getPage: " + error.message);
   }
 }
 async function getByCreator(userId) {
@@ -79,7 +82,7 @@ async function getByCreator(userId) {
     }
     return courses;
   } catch (error) {
-    throw new Error("Error getting courses" + error.message);
+    throw new Error("@Service.getByCreator:" + error.message);
   }
 }
 
@@ -91,7 +94,7 @@ async function getById(id) {
     }
     return course;
   } catch (error) {
-    throw new Error("Error getting courses" + error.message);
+    throw new Error("@Service.getById: " + error.message);
   }
 }
 
@@ -124,13 +127,13 @@ async function getCoursesContent(courseId) {
               attributes: { exclude: ["content"] }, // Exclude lesson content
             },
           ],
+          order: [["index", "ASC"]],
         },
       ],
     });
     return content;
   } catch (error) {
-    console.error("Error fetching course content:", error);
-    throw error; // Forward the error to the caller
+    throw new Error("@Service.getByCoursesContent:" + error.message);
   }
 }
 module.exports = {

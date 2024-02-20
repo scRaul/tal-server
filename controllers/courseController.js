@@ -7,7 +7,9 @@ exports.createCourse = async (req, res, next) => {
     const { title, description, thumbnail } = req.body;
 
     if (!userId || !title || !description || !thumbnail) {
-      return res.status(400).json({ message: "Missing required fields" });
+      const error = new Error("missing required fields");
+      error.statusCode = 400;
+      throw error;
     }
     const courseResponse = await courseService.create(
       userId,
@@ -19,7 +21,9 @@ exports.createCourse = async (req, res, next) => {
       .status(201)
       .json({ message: "Course created successfully", course: courseResponse });
   } catch (err) {
-    next(err);
+    const error = new Error("@Controller.createCourse:" + err.message);
+    error.statusCode = err.statusCode || 500;
+    next(error);
   }
 };
 exports.updateCourse = async (req, res, next) => {
@@ -35,17 +39,21 @@ exports.updateCourse = async (req, res, next) => {
       !isPublic ||
       !courseId
     ) {
-      return res.status(400).json({ message: "Missing required fields" });
+      const error = new Error("missing required fields");
+      error.statusCode = 400;
+      throw error;
     }
-    const newData = { title, description, thumbnail, isPublic };
+    const newData = { courseId, title, description, thumbnail, isPublic };
 
-    const updatedCourse = await courseService.update(courseId, newData);
+    const updatedCourse = await courseService.update(userId, newData);
 
     res
       .status(200)
       .json({ message: "Successful update!", course: updatedCourse });
   } catch (err) {
-    next(err);
+    const error = new Error("@Controller.updateCourse:" + err.message);
+    error.statusCode = err.statusCode || 500;
+    next(error);
   }
 };
 exports.deleteCourse = async (req, res, next) => {
@@ -53,13 +61,17 @@ exports.deleteCourse = async (req, res, next) => {
     const id = req.params.id;
     const userId = req.userId;
     if (!id) {
-      res.status(400).json({ message: "misssing id field" });
+      const error = new Error("missing required fields");
+      error.statusCode = 400;
+      throw error;
     }
 
     const response = await courseService.remove(id, userId);
     console.log(response);
     res.status(200).json({ message: "successfully deleted course" });
-  } catch (error) {
+  } catch (err) {
+    const error = new Error("@Controller.deleteCourse:" + err.message);
+    error.statusCode = err.statusCode || 500;
     next(error);
   }
 };
@@ -72,7 +84,9 @@ exports.getCreatorsCourses = async (req, res, next) => {
       .status(200)
       .json({ message: "successfully fetched your courses", courses });
   } catch (err) {
-    next(err);
+    const error = new Error("@Controller.getCreatorsCourse:" + err.message);
+    error.statusCode = err.statusCode || 500;
+    next(error);
   }
 };
 exports.getCourseById = async (req, res, next) => {
@@ -86,14 +100,18 @@ exports.getCourseById = async (req, res, next) => {
       .status(200)
       .json({ message: "successfully fetched your courses", course });
   } catch (err) {
-    next(err);
+    const error = new Error("@Controller.getCourseById:" + err.message);
+    error.statusCode = err.statusCode || 500;
+    next(error);
   }
 };
 exports.getCourseContent = async (req, res, next) => {
   try {
     const id = req.params.id;
     if (!id) {
-      res.status(400).json({ message: "missing id field" });
+      const error = new Error("missing required fields");
+      error.statusCode = 400;
+      throw error;
     }
     const content = await courseService.getCoursesContent(id);
 
@@ -101,6 +119,8 @@ exports.getCourseContent = async (req, res, next) => {
       .status(200)
       .json({ message: "successfully fetched your courses", content });
   } catch (err) {
-    next(err);
+    const error = new Error("@Controller.getCourseContent:" + err.message);
+    error.statusCode = err.statusCode || 500;
+    next(error);
   }
 };
