@@ -23,11 +23,23 @@ async function create(courseId, title) {
 }
 async function update(userId, newData) {
   try {
-    const mod = await Module.findByPk(newData.moduleId);
+    const mod = await Module.findOne({
+      where: { id: newData.moduleId },
+      include: [
+        {
+          model: Course,
+          include: [
+            {
+              model: User,
+              where: { userId },
+            },
+          ],
+        },
+      ],
+    });
     if (!mod) {
-      throw new Error("Mod not found");
+      throw new Error("module not found");
     }
-
     await mod.update(newData);
     return mod;
   } catch (error) {
