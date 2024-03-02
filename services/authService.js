@@ -55,6 +55,56 @@ async function login(email, password) {
     throw err;
   }
 }
+/**
+ * verify if a refresh token is valid
+ *
+ * @param {string} token
+ * @returns {boolean} if refresh token is valid
+ */
+async function verifyRefreshToken(token) {
+  try {
+    const existingToken = await RefreshToken.findOne({ where: { token } });
+    if (!existingToken) {
+      return false;
+    }
+    const currentDate = new Date();
+    if (existingToken.expiresIn < currentDate) {
+      await existingToken.destroy();
+      return false;
+    }
+    return true;
+  } catch (err) {
+    console.log(err);
+    return false;
+  }
+}
+/**
+ * log out from one client using their refresh token
+ * @param {string} refreshToken - users refresh token
+ * @returns {true}
+ * @throws {Error} - 500
+ */
+async function logoutSingleClient(refreshToken) {
+  try {
+    await RefreshToken.destroy({ where: { token: refreshToken } });
+    return true; // Successful logout
+  } catch (err) {
+    throw err;
+  }
+}
+/**log out all clients with matching user id
+ * @return {true}
+ * @throws {Error}
+ */
+async function logoutAllClients(userId) {
+  try {
+    const refreshTokens = await RefreshToken.findAll({ where: { userId } });
+    await Promise.all(refreshTokens.map((token) => token.destroy()));
+    return true;
+  } catch (err) {
+    throw err;
+  }
+}
 /** create jwt token,return to user
  *
  * @param {string} userId
@@ -66,6 +116,7 @@ function generateAuthToken(userId) {
   const expires = new Date(Date.now() + 2 * 60 * 60 * 1000); //date 2 hours from now
   return { token, expires };
 }
+
 /** create jwt token, save to database, return to user
  *
  * @param {string} userId
@@ -84,3 +135,12 @@ async function generateRreshToken(userId) {
     throw err;
   }
 }
+
+module.exports = {
+  login,
+  signup,
+  logoutSingleClient,
+  logoutAllClients,
+  verifyRefreshToken,
+  generateAuthToken,
+};

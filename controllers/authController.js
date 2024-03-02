@@ -1,12 +1,9 @@
 const authService = require("../services/authService");
 /**
- * sign up request
- *
+ * request sign up
  * @param {*} req - expected fields email, password, username
- * @param {*} res
- * @param {*} next
- * @returns {Promise<{message:string,user:<{userId:string,email:string}>}>}
- * @throws {Error} - missig fields, password length or 500
+ * @param {*} res - {message:string,user:{userId:string,email:string}}
+ * @param {*} next- err
  */
 exports.signup = async (req, res, next) => {
   try {
@@ -21,19 +18,17 @@ exports.signup = async (req, res, next) => {
       error.statusCode = 422;
       throw error;
     }
-    const user = await userService.signup(email, password, username); //returns {userId,email}
+    const user = await authService.signup(email, password, username); //returns {userId,email}
     res.status(201).json({ message: "User created successfully", user });
   } catch (err) {
     next(err);
   }
 };
 /**
- * log in request
- *
+ * request log in
  * @param {*} req - expected fields email and password
- * @param {*} res
- * @param {*} next
- * @return
+ * @param {*} res - cookies(authToken),{message:string,refreshToken:string,userId:string}
+ * @param {*} next - err
  */
 exports.login = async (req, res, next) => {
   try {
@@ -43,11 +38,8 @@ exports.login = async (req, res, next) => {
       error.statusCode = 400;
       throw error;
     }
-    const response = await userService.login(email, password);
-
-    const authTokenObj = response.authTokenObj; //{token:string,expires:Date}
-    const refreshTokenObj = response.refreshTokenObj; //{token:string,expires:Date}
-    const userId = response.userId;
+    const response = await authService.login(email, password);
+    const { authTokenObj, refreshTokenObj, userId } = response;
 
     const authOpt = {
       expires: authTokenObj.expires,
@@ -63,10 +55,54 @@ exports.login = async (req, res, next) => {
     };
 
     res.cookie("authToken", authTokenObj.token, authOpt);
-    res.cookie("refreshToken", refreshTokenObj.token, refreshOpt);
-    res.cookie("userId", userId, userOpt);
-    res.status(200).send("successfully logged in");
-    //if fails, send as json
+    res.status(200).json({
+      message: "successful log in",
+      refreshToken: refreshTokenObj,
+      userId,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+/**
+ * request single client logout
+ * @param {*} req -expected fields rfreshToken
+ * @param {*} res -clear cookie, success message
+ * @param {*} nexta err
+ */
+exports.logoutSingle = async (req, res, next) => {
+  try {
+    const refreshToken = req.body.rfreshToken;
+    if (!refreshToken) {
+      const error = new Error("Missing required fields");
+      error.statusCode = 400;
+      throw error;
+    }
+    authService.logoutSingleClient(refreshToken);
+    res.clearCookie("authToken");
+    res.status(200).send("Logged out successfully");
+  } catch (err) {
+    next(err);
+  }
+};
+
+/**
+ * request log out from all clients
+ * @param {*} req -expected fields none
+ * @param {*} res -clear cookie, success message
+ * @param {*} nexta err
+ */
+exports.logoutAll = async (req, res, next) => {
+  try {
+    const { userId } = req.userData;
+    if (!userId) {
+      const error = new Error("Unable to do so atm");
+      error.statusCode = 400;
+      throw error;
+    }
+    authService.logoutAllClients(userId);
+    res.clearCookie("authToken");
+    res.status(200).send("Logged out successfully");
   } catch (err) {
     next(err);
   }

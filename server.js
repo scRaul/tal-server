@@ -49,6 +49,9 @@ app.use("/course", courseRoute);
 const moduleRoute = require("./routes/moduleRoute");
 app.use("/module", moduleRoute);
 
+app.get("/", (req, res, next) => {
+  res.status(200).send("Hello");
+});
 //CATCH ALL ERRORS THROWN
 const errorHandler = require("./middleware/errorHandler");
 app.use(errorHandler);

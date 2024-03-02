@@ -1,26 +1,58 @@
 const jwt = require("jsonwebtoken");
+const authService = require("../services/authService");
 
-module.exports = (req, res, next) => {
-  const authHeader = req.get("Authorization");
-  if (!authHeader) {
-    const error = new Error("Authorization header is missing");
-    error.statusCode = 401;
-    throw error;
-  }
-  const token = req.get("Authorization").split(" ")[1];
+module.exports = async (req, res, next) => {
+  let token = null;
+  let refreshToken = false;
 
-  var verified;
   try {
+    if (req.cookies.authToken) {
+      token = req.cookies.authToken;
+    } else if (
+      req.headers.authorization &&
+      req.headers.authorization.startsWith("Bearer")
+    ) {
+      token = req.headers.authorization.split(" ")[1];
+      refreshToken = true;
+    }
+
+    if (!token) {
+      const error = new Error("Unauthorized");
+      error.statusCode = 401;
+      throw error;
+    }
+
     const verified = jwt.verify(token, process.env.JWT_SECRET);
     if (!verified) {
       const error = new Error("Not authenticated");
       error.statusCode = 401;
       throw error;
     }
-    req.userId = verified.id;
+
+    if (refreshToken) {
+      const isValid = await authService.verifyRefreshToken(token);
+      if (!isValid) {
+        const error = new Error("Invalid refresh token");
+        error.statusCode = 401;
+        throw error;
+      }
+      const authTokenObj = authService.generateAuthToken(verified.userId);
+      const authOpt = {
+        expires: authTokenObj.expires,
+        httpOnly: true,
+      };
+      res.cookie("authToken", authTokenObj.token, authOpt);
+    }
+
+    req.userData = { userId: verified.userId };
     next();
   } catch (err) {
-    err.statusCode = 500;
-    next(err);
+    // Handle the "socket hang up" error and respond appropriately
+    if (err.code === "ECONNRESET") {
+      res.status(500).send("Internal Server Error");
+    } else {
+      err.statusCode = err.statusCode || 500;
+      next(err);
+    }
   }
 };
