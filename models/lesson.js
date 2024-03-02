@@ -32,6 +32,10 @@ const Lesson = sequelize.define("lessons", {
     type: DataTypes.BOOLEAN,
     defaultValue: false,
   },
+  isBlocked: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+  },
 });
 
 module.exports = Lesson;

@@ -78,8 +78,32 @@ exports.updateModule = async (req, res, next) => {
     }
     const newData = { moduleId, courseId, title, index, isPublic };
     const updateModule = moduleService.update(userId, newData);
+    res
+      .status(200)
+      .json({ message: "successfully updated module", module: updateModule });
   } catch (err) {
     const error = new Error("@Controller.getModuleById" + err.message);
+    error.statusCode = err.statusCode || 500;
+    next(error);
+  }
+};
+exports.renameModule = async (req, res, next) => {
+  try {
+    const userId = req.userId;
+    const moduleId = req.params.id;
+    const { title } = req.body;
+    if (!title || !userId || !moduleId) {
+      const error = new Error("missing fields");
+      error.statusCode = 400;
+      throw error;
+    }
+    const newData = { title, moduleId };
+    const updateModule = moduleService.update(userId, newData);
+    res
+      .status(200)
+      .json({ message: "successfully updated module", module: updateModule });
+  } catch (err) {
+    const error = new Error("@Controller.rename" + err.message);
     error.statusCode = err.statusCode || 500;
     next(error);
   }

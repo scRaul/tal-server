@@ -9,6 +9,7 @@ module.exports = (error, req, res, next) => {
     error.statusCode = 422;
   }
   const status = error.statusCode || 500;
+  console.log(error.stack);
   res.status(status).json({
     message: message,
   });

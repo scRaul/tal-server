@@ -10,7 +10,7 @@ const Course = sequelize.define("courses", {
     allowNull: false,
   },
   userId: {
-    type: DataTypes.INTEGER,
+    type: DataTypes.UUID,
     references: {
       model: User,
       key: "userId",
@@ -29,6 +29,10 @@ const Course = sequelize.define("courses", {
     type: DataTypes.STRING(200),
   },
   isPublic: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+  },
+  isBlocked: {
     type: DataTypes.BOOLEAN,
     defaultValue: false,
   },

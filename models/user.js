@@ -3,10 +3,14 @@ const sequelize = require("../util/database");
 
 const User = sequelize.define("users", {
   userId: {
-    type: DataTypes.INTEGER,
+    type: DataTypes.UUID,
+    defaultValue: DataTypes.UUIDV4,
     primaryKey: true,
-    autoIncrement: true,
+  },
+  username: {
+    type: DataTypes.STRING,
     allowNull: false,
+    unique: true,
   },
   email: {
     type: DataTypes.STRING,
@@ -20,9 +24,14 @@ const User = sequelize.define("users", {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  name: {
-    type: DataTypes.STRING,
+  permissionLevel: {
+    type: DataTypes.ENUM("user", "mod", "admin"),
     allowNull: false,
+    defaultValue: "user",
+  },
+  strikes: {
+    type: DataTypes.INTEGER,
+    defaultValue: 0,
   },
 });
 

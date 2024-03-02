@@ -9,5 +9,5 @@ router.use(multer().none());
 router.use(isAuth);
 router.post("/create", controller.createModule);
 router.delete("/delete/:id", controller.deleteModule);
-
+router.put("/rename/:id", controller.renameModule);
 module.exports = router;

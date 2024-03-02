@@ -1,5 +1,6 @@
 require("dotenv").config();
 const express = require("express");
+const cookieParser = require("cookie-parser");
 const sequelize = require("./util/database");
 
 //DATA BASE ----
@@ -8,9 +9,12 @@ const Course = require("./models/course");
 const Module = require("./models/module");
 const Lesson = require("./models/lesson");
 const Tag = require("./models/tag");
+const RefreshToken = require("./models/refreshTokens");
 // Define Relationships
 User.hasMany(Course, { foreignKey: "userId", onDelete: "CASCADE" });
 Course.belongsTo(User, { foreignKey: "userId" });
+
+User.hasMany(RefreshToken, { foreignKey: "userId" });
 
 Course.hasMany(Module, { foreignKey: "courseId", onDelete: "CASCADE" });
 Module.belongsTo(Course, { foreignKey: "courseId" });
@@ -25,6 +29,7 @@ const app = express();
 
 // Middleware
 app.use(express.json());
+app.use(cookieParser());
 // Use logger middleware only if not in production
 
 const logger = require("./middleware/logger");
@@ -37,8 +42,10 @@ app.use(cors);
 //ROUTES
 const authRoute = require("./routes/authRoute");
 app.use("/authenticate", authRoute);
+
 const courseRoute = require("./routes/courseRoute");
 app.use("/course", courseRoute);
+
 const moduleRoute = require("./routes/moduleRoute");
 app.use("/module", moduleRoute);
 
