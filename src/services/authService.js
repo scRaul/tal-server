@@ -1,7 +1,6 @@
-const User = require("../models/user");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const RefreshToken = require("../models/refreshTokens.js");
+const RefreshToken = require("../../database/models/refreshTokens.js");
 
 /**
  * Creates login credentials for a user

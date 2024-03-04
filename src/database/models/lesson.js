@@ -1,32 +1,32 @@
 const { DataTypes } = require("sequelize");
-const sequelize = require("../util/database");
-const User = require("./user");
+const sequelize = require("../database");
+const Module = require("./module");
 
-const Course = sequelize.define("courses", {
-  courseId: {
+const Lesson = sequelize.define("lessons", {
+  lessonId: {
     type: DataTypes.INTEGER,
     primaryKey: true,
     autoIncrement: true,
     allowNull: false,
   },
-  userId: {
-    type: DataTypes.UUID,
-    references: {
-      model: User,
-      key: "userId",
-    },
+  moduleId: {
+    type: DataTypes.INTEGER,
     allowNull: false,
+    references: {
+      model: Module,
+      key: "moduleId",
+    },
   },
   title: {
     type: DataTypes.STRING(50),
     allowNull: false,
   },
-  description: {
-    type: DataTypes.STRING(500),
-    allowNull: false,
+  content: {
+    type: DataTypes.TEXT,
   },
-  thumbnail: {
-    type: DataTypes.STRING(200),
+  index: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
   },
   isPublic: {
     type: DataTypes.BOOLEAN,
@@ -38,4 +38,4 @@ const Course = sequelize.define("courses", {
   },
 });
 
-module.exports = Course;
+module.exports = Lesson;

@@ -1,4 +1,4 @@
-const authService = require("../services/authService");
+const UserRepo = require("../database/repos/userRepo");
 /**
  * request sign up
  * @param {*} req - expected fields email, password, username
@@ -13,14 +13,11 @@ exports.signup = async (req, res, next) => {
       error.statusCode = 400;
       throw error;
     }
-    if (password.length < 6) {
-      const error = new Error("Password too short.");
-      error.statusCode = 422;
-      throw error;
-    }
-    const user = await authService.signup(email, password, username); //returns {userId,email}
+    const user = await UserRepo.create(username, password, email);
     res.status(201).json({ message: "User created successfully", user });
   } catch (err) {
+    if (err.message.includes("Password")) err.statusCode = 400;
+    if (err.message.includes("Email")) err.statusCode = 409;
     next(err);
   }
 };

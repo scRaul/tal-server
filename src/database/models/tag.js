@@ -1,6 +1,6 @@
 // tags.js
 const { DataTypes } = require("sequelize");
-const sequelize = require("../util/database");
+const sequelize = require("../database");
 
 const Tag = sequelize.define("tags", {
   tagId: {

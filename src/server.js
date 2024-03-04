@@ -1,15 +1,15 @@
 require("dotenv").config();
 const express = require("express");
 const cookieParser = require("cookie-parser");
-const sequelize = require("./util/database");
+const sequelize = require("./database/database");
 
 //DATA BASE ----
-const User = require("./models/user");
-const Course = require("./models/course");
-const Module = require("./models/module");
-const Lesson = require("./models/lesson");
-const Tag = require("./models/tag");
-const RefreshToken = require("./models/refreshTokens");
+const User = require("./database/models/user");
+const Course = require("./database/models/course");
+const Module = require("./database/models/module");
+const Lesson = require("./database/models/lesson");
+const Tag = require("./database/models/tag");
+const RefreshToken = require("./database/models/refreshTokens");
 // Define Relationships
 User.hasMany(Course, { foreignKey: "userId", onDelete: "CASCADE" });
 Course.belongsTo(User, { foreignKey: "userId" });
@@ -43,11 +43,14 @@ app.use(cors);
 const authRoute = require("./routes/authRoute");
 app.use("/authenticate", authRoute);
 
-const courseRoute = require("./routes/courseRoute");
-app.use("/course", courseRoute);
+// const creatorRoute = require("./routes/creatorRoute");
+// app.use("/studio", creatorRoute);
 
-const moduleRoute = require("./routes/moduleRoute");
-app.use("/module", moduleRoute);
+// const courseRoute = require("./routes/courseRoute");
+// app.use("/course", courseRoute);
+
+// const moduleRoute = require("./routes/moduleRoute");
+// app.use("/module", moduleRoute);
 
 app.get("/", (req, res, next) => {
   res.status(200).send("Hello");
