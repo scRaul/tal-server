@@ -1,7 +1,7 @@
 require("dotenv").config();
 const express = require("express");
 const cookieParser = require("cookie-parser");
-const sequelize = require("./database/database");
+const sequelize = require("./database/db");
 
 //DATA BASE ----
 const User = require("./database/models/user");
@@ -40,8 +40,8 @@ const cors = require("./middleware/cors");
 app.use(cors);
 
 //ROUTES
-// const authRoute = require("./routes/authRoute");
-// app.use("/authenticate", authRoute);
+const authRoute = require("./routes/authRoute");
+app.use("/authenticate", authRoute);
 
 // const creatorRoute = require("./routes/creatorRoute");
 // app.use("/studio", creatorRoute);

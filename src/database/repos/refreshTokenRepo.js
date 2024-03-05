@@ -6,8 +6,8 @@ async function create(userId) {
     const refToken = await generateRreshToken(userId);
     const authToken = generateAuthToken(userId);
     const token = refToken.token;
-    const expires = refToken.expires;
-    const rec = await RefreshToken.create({ token, userId, expires });
+    const expiresIn = refToken.expires;
+    const rec = await RefreshToken.create({ token, userId, expiresIn });
     return { refToken, authToken };
   } catch (err) {
     throw err;
@@ -19,6 +19,10 @@ async function verify(token) {
     const rec = await RefreshToken.findOne({ where: { token } });
 
     if (!rec) {
+      return false;
+    }
+    if (rec.expiresIn < Date.now()) {
+      rec.destroy();
       return false;
     }
     return true;
@@ -51,17 +55,11 @@ function generateAuthToken(userId) {
   return { token, expires };
 }
 
-async function generateRreshToken(userId) {
+function generateRreshToken(userId) {
   const payload = { userId };
   const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "7d" });
   const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // date 7 days from now
-  try {
-    const data = { token, userId, expiresIn: expires };
-    const entry = await RefreshToken.create(data);
-    return { token, expires };
-  } catch (err) {
-    throw err;
-  }
+  return { token, expires };
 }
 module.exports = {
   create,

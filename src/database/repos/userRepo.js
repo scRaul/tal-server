@@ -69,7 +69,7 @@ async function updatePassword(userId, newPassword) {
 async function verify(email, password) {
   try {
     const user = await User.findOne({
-      attributes: ["password"],
+      attributes: ["userId", "password"],
       where: { email },
     });
     if (!user) {

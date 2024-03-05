@@ -19,6 +19,10 @@ router.post("/login", controller.login);
 
 router.use(isAuth);
 
+router.get("/verify", (req, res) => {
+  res.send("HERE");
+});
+
 router.delete("/logout", controller.logoutSingle);
 router.delete("/logout-all", controller.logoutAll);
 

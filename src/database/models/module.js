@@ -1,5 +1,5 @@
 const { DataTypes } = require("sequelize");
-const sequelize = require("../database");
+const sequelize = require("../db");
 const Course = require("./course");
 
 const Module = sequelize.define("modules", {
@@ -24,6 +24,8 @@ const Module = sequelize.define("modules", {
   index: {
     type: DataTypes.INTEGER,
     allowNull: false,
+    defaultValue: 0,
+    autoIncrement: true,
   },
   isPublic: {
     type: DataTypes.BOOLEAN,

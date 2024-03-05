@@ -37,6 +37,7 @@ exports.login = async (req, res, next) => {
       throw error;
     }
     const user = await UserRepo.verify(email, password);
+    console.log(user);
 
     if (!user) {
       const error = new Error("wrong credintials");
