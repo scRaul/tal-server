@@ -19,14 +19,6 @@ router.post("/login", controller.login);
 
 router.use(isAuth);
 
-router.get("/hasToken", (req, res, next) => {
-  try {
-    res.status(200).send(!!req.userData);
-  } catch (err) {
-    next(err);
-  }
-});
-
 router.delete("/logout", controller.logoutSingle);
 router.delete("/logout-all", controller.logoutAll);
 

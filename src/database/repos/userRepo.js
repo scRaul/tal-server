@@ -4,20 +4,7 @@ const bcrypt = require("bcryptjs");
 function userDTO(user) {
   return { userId: user.userId, username: user.username, email: user.email };
 }
-function userDTOList(users) {
-  let dtos = [];
-  users.forEach((user) => {
-    dtos.push(userDTO(user));
-  });
-}
-/**
- * add a new user to database
- * @param {string} username
- * @param {string} password
- * @param {string} email
- * @returns {Promise<userDTO>}
- * @throws {Error} -if email alreay exists || password too short || 500
- */
+
 async function create(username, password, email) {
   try {
     if (password.length < 6) {
@@ -79,23 +66,27 @@ async function updatePassword(userId, newPassword) {
   }
 }
 
-async function verifyCred(email, password) {
+async function verify(email, password) {
   try {
-    const actualPassword = await User.findOne({
+    const user = await User.findOne({
       attributes: ["password"],
       where: { email },
     });
-    if (!actualPassword) {
-      throw Error("Unauthorized");
+    if (!user) {
+      throw new Error("Unauthorized");
     }
+    const actualPassword = user.password;
     const isValid = await bcrypt.compare(password, actualPassword);
-    return isValid;
+    if (isValid) {
+      return { userId: user.userId };
+    } else {
+      return null;
+    }
   } catch (err) {
-    console.error("Error updating username:", err);
+    console.error("Error verifying credentials:", err);
     throw err;
   }
 }
-
 async function getAll() {
   try {
     // Retrieve all user records from the database
@@ -149,9 +140,11 @@ async function getByUsername(username) {
 module.exports = {
   create,
   remove,
+  updatePassword,
+  updateUsername,
   getAll,
   getByUserId,
   getByEmail,
   getByUsername,
-  verifyCred,
+  verify,
 };

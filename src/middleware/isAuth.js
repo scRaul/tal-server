@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-const authService = require("../business/authService/authService");
+const RefreshTokenRepo = require("../database/models/refreshTokens");
 
 module.exports = async (req, res, next) => {
   let token = null;
@@ -30,13 +30,13 @@ module.exports = async (req, res, next) => {
     }
 
     if (refreshToken) {
-      const isValid = await authService.verifyRefreshToken(token);
+      const isValid = await RefreshTokenRepo.verify(token);
       if (!isValid) {
         const error = new Error("Invalid refresh token");
         error.statusCode = 401;
         throw error;
       }
-      const authTokenObj = authService.generateAuthToken(verified.userId);
+      const authTokenObj = RefreshTokenRepo.generateAuthToken(verified.userId);
       const authOpt = {
         expires: authTokenObj.expires,
         httpOnly: true,

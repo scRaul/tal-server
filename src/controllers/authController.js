@@ -1,4 +1,5 @@
-const UserRepo = require("../database/repos/userRepo");
+const UserRepo = require("../database/repos/UserRepo");
+const RefreshTokenRepo = require("../database/repos/refreshTokenRepo");
 /**
  * request sign up
  * @param {*} req - expected fields email, password, username
@@ -35,27 +36,25 @@ exports.login = async (req, res, next) => {
       error.statusCode = 400;
       throw error;
     }
-    const response = await authService.login(email, password);
-    const { authTokenObj, refreshTokenObj, userId } = response;
+    const user = await UserRepo.verify(email, password);
+
+    if (!user) {
+      const error = new Error("wrong credintials");
+      error.statusCode = 401;
+      throw error;
+    }
+    const { authToken, refToken } = await RefreshTokenRepo.create(user.userId);
 
     const authOpt = {
-      expires: authTokenObj.expires,
-      httpOnly: true,
-    };
-    const refreshOpt = {
-      expires: refreshTokenObj.expires,
-      httpOnly: true,
-    };
-    const userOpt = {
-      expires: refreshTokenObj.expires,
+      expires: authToken.expires,
       httpOnly: true,
     };
 
-    res.cookie("authToken", authTokenObj.token, authOpt);
+    res.cookie("authToken", authToken.token, authOpt);
     res.status(200).json({
       message: "successful log in",
-      refreshToken: refreshTokenObj,
-      userId,
+      refreshToken: refToken,
+      userId: user.userId,
     });
   } catch (err) {
     next(err);
@@ -75,7 +74,7 @@ exports.logoutSingle = async (req, res, next) => {
       error.statusCode = 400;
       throw error;
     }
-    authService.logoutSingleClient(refreshToken);
+    await RefreshTokenRepo.removeToken(refreshToken);
     res.clearCookie("authToken");
     res.status(200).send("Logged out successfully");
   } catch (err) {
@@ -97,7 +96,7 @@ exports.logoutAll = async (req, res, next) => {
       error.statusCode = 400;
       throw error;
     }
-    authService.logoutAllClients(userId);
+    await RefreshTokenRepo.removeUser(userId);
     res.clearCookie("authToken");
     res.status(200).send("Logged out successfully");
   } catch (err) {

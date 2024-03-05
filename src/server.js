@@ -40,8 +40,8 @@ const cors = require("./middleware/cors");
 app.use(cors);
 
 //ROUTES
-const authRoute = require("./routes/authRoute");
-app.use("/authenticate", authRoute);
+// const authRoute = require("./routes/authRoute");
+// app.use("/authenticate", authRoute);
 
 // const creatorRoute = require("./routes/creatorRoute");
 // app.use("/studio", creatorRoute);
