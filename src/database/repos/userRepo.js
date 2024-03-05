@@ -1,5 +1,15 @@
 const User = require("../models/user");
 const bcrypt = require("bcryptjs");
+
+function userDTO(user) {
+  return { userId: user.userId, username: user.username, email: user.email };
+}
+function userDTOList(users) {
+  let dtos = [];
+  users.forEach((user) => {
+    dtos.push(userDTO(user));
+  });
+}
 /**
  * add a new user to database
  * @param {string} username
@@ -23,7 +33,7 @@ async function create(username, password, email) {
       password: hashedPassword,
       email,
     });
-    return { userId: newUser.userId, username, email };
+    return userDTO(newUser);
   } catch (err) {
     throw err;
   }
@@ -45,10 +55,10 @@ async function updateUsername(userId, newUsername) {
   try {
     const updatedUser = await User.update(
       { username: newUsername },
-      { where: { userId: newDataObj.userId } }
+      { where: { userId } }
     );
 
-    return;
+    return userDTO(updatedUser);
   } catch (err) {
     console.error("Error updating username:", err);
     throw err;
@@ -56,11 +66,30 @@ async function updateUsername(userId, newUsername) {
 }
 async function updatePassword(userId, newPassword) {
   try {
+    const hashedPassword = await bcrypt.hash(password, 10);
+
     const updatedUser = await User.update(
-      { username: newUsername },
-      { where: { userId: newDataObj.userId } }
+      { password: hashedPassword },
+      { where: { userId } }
     );
-    return;
+    return userDTO(updatedUser);
+  } catch (err) {
+    console.error("Error updating username:", err);
+    throw err;
+  }
+}
+
+async function verifyCred(email, password) {
+  try {
+    const actualPassword = await User.findOne({
+      attributes: ["password"],
+      where: { email },
+    });
+    if (!actualPassword) {
+      throw Error("Unauthorized");
+    }
+    const isValid = await bcrypt.compare(password, actualPassword);
+    return isValid;
   } catch (err) {
     console.error("Error updating username:", err);
     throw err;
@@ -79,45 +108,50 @@ async function getAll() {
     throw err;
   }
 }
-// async function getByUserId(userId) {
-//   try {
-//     // Retrieve a user record from the database by userId
-//     const user = await User.findByPk(userId);
+async function getByUserId(userId) {
+  try {
+    // Retrieve a user record from the database by userId
+    const user = await User.findByPk(userId);
+    return userDTO(user);
+  } catch (err) {
+    console.error("Error getting user by userId:", err);
+    throw err;
+  }
+}
 
-//     return user; // Return the user object
-//   } catch (err) {
-//     console.error("Error getting user by userId:", err);
-//     throw err;
-//   }
-// }
+async function getByEmail(email) {
+  try {
+    // Retrieve a user record from the database by email
+    const user = await User.findOne({ where: { email: email } });
 
-// async function getByEmail(email) {
-//   try {
-//     // Retrieve a user record from the database by email
-//     const user = await User.findOne({ where: { email: email } });
+    return userDTO(user);
+  } catch (err) {
+    console.error("Error getting user by email:", err);
+    throw err;
+  }
+}
 
-//     return user; // Return the user object
-//   } catch (err) {
-//     console.error("Error getting user by email:", err);
-//     throw err;
-//   }
-// }
+async function getByUsername(username) {
+  try {
+    // Retrieve user records from the database by username
+    const users = await User.findAll({
+      attributes: ["userId", "username", "email"],
+      where: { username: username },
+    });
 
-// async function getByUsername(username) {
-//   try {
-//     // Retrieve user records from the database by username
-//     const users = await User.findAll({ where: { username: username } });
-
-//     return users; // Return an array of user objects
-//   } catch (err) {
-//     console.error("Error getting user by username:", err);
-//     throw err;
-//   }
-// }
+    return users; // Return an array of user objects
+  } catch (err) {
+    console.error("Error getting user by username:", err);
+    throw err;
+  }
+}
 
 module.exports = {
   create,
   remove,
-  update,
   getAll,
+  getByUserId,
+  getByEmail,
+  getByUsername,
+  verifyCred,
 };
