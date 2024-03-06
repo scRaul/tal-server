@@ -37,25 +37,20 @@ exports.login = async (req, res, next) => {
       throw error;
     }
     const user = await UserRepo.verify(email, password);
-    console.log(user);
 
     if (!user) {
-      const error = new Error("wrong credintials");
+      const error = new Error("wrong credentials");
       error.statusCode = 401;
       throw error;
     }
     const { authToken, refToken } = await RefreshTokenRepo.create(user.userId);
 
-    const authOpt = {
-      expires: authToken.expires,
-      httpOnly: true,
-    };
-
-    res.cookie("authToken", authToken.token, authOpt);
     res.status(200).json({
-      message: "successful log in",
-      refreshToken: refToken,
+      message: "Successful log in",
+      refToken,
+      authToken,
       userId: user.userId,
+      usernmae: user.username,
     });
   } catch (err) {
     next(err);

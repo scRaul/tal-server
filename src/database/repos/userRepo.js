@@ -69,16 +69,16 @@ async function updatePassword(userId, newPassword) {
 async function verify(email, password) {
   try {
     const user = await User.findOne({
-      attributes: ["userId", "password"],
+      attributes: ["userId", "password", "username"],
       where: { email },
     });
     if (!user) {
-      throw new Error("Unauthorized");
+      throw new Error("Email not found");
     }
     const actualPassword = user.password;
     const isValid = await bcrypt.compare(password, actualPassword);
     if (isValid) {
-      return { userId: user.userId };
+      return { userId: user.userId, username: user.username };
     } else {
       return null;
     }
@@ -89,7 +89,6 @@ async function verify(email, password) {
 }
 async function getAll() {
   try {
-    // Retrieve all user records from the database
     const allUsers = await User.findAll({
       attributes: ["userId", "username", "email"],
     });
@@ -101,7 +100,6 @@ async function getAll() {
 }
 async function getByUserId(userId) {
   try {
-    // Retrieve a user record from the database by userId
     const user = await User.findByPk(userId);
     return userDTO(user);
   } catch (err) {
@@ -112,9 +110,7 @@ async function getByUserId(userId) {
 
 async function getByEmail(email) {
   try {
-    // Retrieve a user record from the database by email
     const user = await User.findOne({ where: { email: email } });
-
     return userDTO(user);
   } catch (err) {
     console.error("Error getting user by email:", err);
@@ -124,13 +120,11 @@ async function getByEmail(email) {
 
 async function getByUsername(username) {
   try {
-    // Retrieve user records from the database by username
     const users = await User.findAll({
       attributes: ["userId", "username", "email"],
       where: { username: username },
     });
-
-    return users; // Return an array of user objects
+    return users;
   } catch (err) {
     console.error("Error getting user by username:", err);
     throw err;

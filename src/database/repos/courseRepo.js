@@ -2,24 +2,26 @@ const Course = require("../models/course");
 
 async function create(userId, title, description, thumbnail) {
   try {
-    const newCourse = await Course.create({
-      userId,
-      title,
-      description,
-      thumbnail,
+    const [course, created] = await Course.findOrCreate({
+      where: { userId, title },
+      defaults: {
+        userId,
+        title,
+        description,
+        thumbnail,
+      },
     });
-
-    return newCourse;
+    return { course, created };
   } catch (err) {
     console.error("Error creating course:", err);
     throw err;
   }
 }
 
-async function remove(courseId) {
+async function remove(courseId, userId) {
   try {
     const deletedCourseCount = await Course.destroy({
-      where: { courseId },
+      where: { courseId, userId },
     });
     return deletedCourseCount;
   } catch (err) {

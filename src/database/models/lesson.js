@@ -28,7 +28,6 @@ const Lesson = sequelize.define("lessons", {
   index: {
     type: DataTypes.INTEGER,
     allowNull: false,
-    autoIncrement: true,
   },
   isPublic: {
     type: DataTypes.BOOLEAN,

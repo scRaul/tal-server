@@ -25,7 +25,6 @@ const Module = sequelize.define("modules", {
     type: DataTypes.INTEGER,
     allowNull: false,
     defaultValue: 0,
-    autoIncrement: true,
   },
   isPublic: {
     type: DataTypes.BOOLEAN,

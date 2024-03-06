@@ -3,11 +3,11 @@ const jwt = require("jsonwebtoken");
 
 async function create(userId) {
   try {
-    const refToken = await generateRreshToken(userId);
+    const refToken = generateRreshToken(userId);
     const authToken = generateAuthToken(userId);
     const token = refToken.token;
-    const expiresIn = refToken.expires;
-    const rec = await RefreshToken.create({ token, userId, expiresIn });
+    const expiresIn = new Date(refToken.expires);
+    await RefreshToken.create({ token, userId, expiresIn });
     return { refToken, authToken };
   } catch (err) {
     throw err;
@@ -50,15 +50,19 @@ async function removeUser(userId) {
 
 function generateAuthToken(userId) {
   const payload = { userId };
-  const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "2h" });
-  const expires = new Date(Date.now() + 2 * 60 * 60 * 1000); //date 2 hours from now
+  const expires = Date.now() + 2 * 60 * 60 * 1000;
+  const token = jwt.sign(payload, process.env.JWT_SECRET, {
+    expiresIn: expires,
+  });
   return { token, expires };
 }
 
 function generateRreshToken(userId) {
   const payload = { userId };
-  const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "7d" });
-  const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // date 7 days from now
+  const expires = Date.now() + 7 * 24 * 60 * 60 * 1000;
+  const token = jwt.sign(payload, process.env.JWT_SECRET, {
+    expiresIn: expires,
+  });
   return { token, expires };
 }
 module.exports = {
